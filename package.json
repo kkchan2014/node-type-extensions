@@ -16,6 +16,6 @@
 		"url": "https://github.com/kkchan2014/node-type-extensions.git"
 	},
   "dependencies": {
-    "request": "latest"
+    "extend": "latest"
   }
 }
