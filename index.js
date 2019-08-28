@@ -241,13 +241,23 @@ extend(Object, {
         
         return list;
     },
-    each: function (obj, eachHandler) {
+    extract: function (obj, func) {
+        if(obj instanceof Array || !(obj instanceof Object)) {
+            obj = { 0: obj };
+        }
+
         for (var key in obj) {
-            if (obj.hasOwnProperty(key) && eachHandler(key, obj[key]) === true) {
+            if (obj.hasOwnProperty(key) && func(key, obj[key]) === true) {
                 break;
             }
         }
 
         return obj;
+    },
+    isObject: function(_1) {
+        return _1 instanceof Object && _1.hasOwnProperty && _1.isPrototypeOf;
+    },
+    isArray: function(_1) {
+        return _1 instanceof Array;
     }
 });
