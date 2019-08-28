@@ -1,0 +1,21 @@
+{
+  "name": "node-type-extensions",
+  "version": "1.0.0",
+  "description": "system type extensions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kkchan (694643393@qq.com)",
+  "license": "ISC",
+  "engines": {
+    "node": "10.x.x"
+  },
+  "repository": {
+		"type": "git",
+		"url": "https://github.com/kkchan2014/node-type-extensions.git"
+	},
+  "dependencies": {
+    "request": "latest"
+  }
+}
