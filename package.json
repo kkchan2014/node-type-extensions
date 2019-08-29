@@ -1,6 +1,6 @@
 {
   "name": "node-type-extensions",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "system type extensions",
   "main": "index.js",
   "scripts": {

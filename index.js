@@ -11,7 +11,7 @@ extend(Number.prototype, {
     //数字补位
     comp: function(nn) {
         var val = this.toString();
-        var nnLen = typeof nn === 'string' ? nn.length : nn;
+        var nnLen = Object.isString(nn) ? nn.length : nn;
     
         if(nnLen <= val.length) {
             return val.substr(nnLen - val.length);
@@ -31,10 +31,10 @@ extend(String.prototype, {
         return new Date(this);
     },
     startWith: function (c) {
-        return typeof c === 'string' && c.length > 0 && this.length >= c.length && this.substr(0, c.length) === c;
+        return Object.isString(c) && c.length > 0 && this.length >= c.length && this.substr(0, c.length) === c;
     },
     endWith: function (c) {
-        return typeof c === 'string' && this.length > 0 && c.length >= this.length && c.substr(c.length - this.length) === this;
+        return Object.isString(c) && this.length > 0 && c.length >= this.length && c.substr(c.length - this.length) === this;
     },
     prependWith: function (condition, c) {
         if (!c) {
@@ -109,23 +109,19 @@ extend(Array.prototype, {
     deepCopy: function() {
         return JSON.parse(JSON.stringify(this));
     },
-    where: function(_eachHandler) {
+    where: function(handle) {
         var result = [];
 
-        this.forEach(function(item, index) {
-            if(_eachHandler(item, index) === true) {
-                result.push(item);
-            }
-        });
+        this.forEach((item, index) => handle(item, index) === true && result.push(item));
 
         return result;
     },
-    first: function(_eachHandler) {
+    first: function(handle) {
         var result = null;
 
-        if(_eachHandler) {
+        if(handle) {
             this.some(function(item, index) {
-                if(!_eachHandler || _eachHandler(item, index) === true) {
+                if(!handle || handle(item, index) === true) {
                     result = item;
     
                     return true;
@@ -150,11 +146,7 @@ extend(Array.prototype, {
         return this;
     },
     addrange: function(arr) {
-        arr.forEach(a => {
-            if (a !== undefined) {
-                this.push(a);
-            }
-        });
+        arr.forEach(a => a !== undefined && this.push(a));
         
         return this;
     },
@@ -171,11 +163,7 @@ extend(Array.prototype, {
     toDict: function (keyf, valf) {
         var dict = {};
 
-        this.forEach(a => {
-            if (a[keyf]) {
-                dict[a[keyf]] = a[valf];
-            }
-        });
+        this.forEach(a => a[keyf] && (dict[a[keyf]] = a[valf]));
 
         return dict;
     },
@@ -184,33 +172,27 @@ extend(Array.prototype, {
             extend(this[i], ext);
 
             if (replace === true) {
-                Object.each(this[i], (key, val) => {
-                    if (typeof val === 'string') {
-                        this[i][key] = val.replace('{index}', Number(i) + 1);
-                    }
-                });
+                Object.extract(this[i], (k, v) => Object.isString(v) && (this[i][k] = v.replace('{index}', Number(i) + 1)));
             }
         }
 
         return this;
     },
-    toData: function(fields, extendData) {
+    toData: function(fields, d) {
         var data = [[]];
 
-        for(var key in fields) {
-            data[0].push(fields[key]);
-        }
+        Object.extract(fields, (k, v) => data[0].push(v));
+
+        d = d || {};
 
         this.forEach(function(item) {
             var row = [];
 
-            extendData = extendData || {};
-
-            for(var key in fields) {
-                var cellValue = extendData[key] ? (typeof extendData[key] === 'function' ? extendData[key](item[key]) : extendData[key]) : item[key];
+            Object.extract(fields, (k, v) => {
+                var cellValue = d[k] ? (Object.isFunction(d[k]) ? d[k](item[k]) : d[k]) : item[k];
 
                 row.push((cellValue || '').toString());
-            }
+            });
 
             data.push(row);
         });
@@ -222,10 +204,10 @@ extend(Object, {
     toList: function(obj, opts) {
         var list = [];
 
-        Object.each(obj, (key, val) => {
+        Object.extract(obj, (key, val) => {
             var item = extend({}, opts);
 
-            Object.each(item, (key2, val2) => {
+            Object.extract(item, (key2, val2) => {
                 switch (val2) {
                     case '$key':
                         item[key2] = key;
@@ -241,13 +223,13 @@ extend(Object, {
         
         return list;
     },
-    extract: function (obj, func) {
-        if(obj instanceof Array || !(obj instanceof Object)) {
-            obj = { 0: obj };
+    extract: function (obj, func, keyHandle) {
+        if(obj instanceof Array || !Object.isObject(obj)) {
+            obj = { '0': obj };
         }
 
         for (var key in obj) {
-            if (obj.hasOwnProperty(key) && func(key, obj[key]) === true) {
+            if (obj.hasOwnProperty(key) && func(keyHandle ? keyHandle(key) : key, obj[key]) === true) {
                 break;
             }
         }
@@ -259,5 +241,14 @@ extend(Object, {
     },
     isArray: function(_1) {
         return _1 instanceof Array;
+    },
+    isFunction: function(_1) {
+        return typeof _1 === 'function';
+    },
+    isString: function(_1) {
+        return typeof _1 === 'string';
+    },
+    isNumber: function(_1) {
+        return typeof _1 === 'number';
     }
 });
